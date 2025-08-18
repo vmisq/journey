@@ -272,26 +272,32 @@ def process_files(subfolder, folder, target, processor):
     else:
         print(f'No new items in {folder}')
 
-def main():
-    from multiprocessing import Process
+from multiprocessing import Process, Queue
+import traceback
+
+def safe_process_files(q, *args):
     try:
-        duckdb.sql("DETACH p")
-    except duckdb.BinderException:
-        pass
-    duckdb.sql("ATTACH '' AS p (TYPE postgres)")
+        process_files(*args)
+        q.put(None)  # success
+    except Exception as e:
+        q.put(traceback.format_exc())
+
+def main():
+    q = Queue()
     subfolders = list_subfolders()
     task_list = [
-        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_1'), os.environ.get('TARGET_1'), parse_scale_image)),
-        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_2'), os.environ.get('TARGET_2'), parse_loseit_files)),
-        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_3'), os.environ.get('TARGET_3'), parse_loseit_files)),
-        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_4'), os.environ.get('TARGET_4'), parse_strong_files)),
-        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_5'), os.environ.get('TARGET_5'), parse_strong_files)),
+        Process(target=safe_process_files, args=(q, subfolders, os.environ.get('FOLDER_1'), os.environ.get('TARGET_1'), parse_scale_image)),
+        Process(target=safe_process_files, args=(q, subfolders, os.environ.get('FOLDER_2'), os.environ.get('TARGET_2'), parse_loseit_files)),
+        Process(target=safe_process_files, args=(q, subfolders, os.environ.get('FOLDER_3'), os.environ.get('TARGET_3'), parse_loseit_files)),
+        Process(target=safe_process_files, args=(q, subfolders, os.environ.get('FOLDER_4'), os.environ.get('TARGET_4'), parse_strong_files)),
+        Process(target=safe_process_files, args=(q, subfolders, os.environ.get('FOLDER_5'), os.environ.get('TARGET_5'), parse_strong_files)),
     ]
-    for i in task_list:
-        i.start()
-        print('started')
-    for i in task_list:
-        i.join()
-        print('ended')
+    for p in task_list:
+        p.start()
+    for p in task_list:
+        p.join()
+        exc = q.get()
+        if exc is not None:
+            raise RuntimeError(f"Process failed:\n{exc}")
 if __name__=='__main__':
     main()
