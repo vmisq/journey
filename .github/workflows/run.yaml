@@ -38,6 +38,6 @@ jobs:
         with:
           python-version: 3.11
       - name: Install dependencies
-        run: pip install requests duckdb pyarrow numpy Pillow opencv-python pytesseract
+        run: pip install requests duckdb pyarrow numpy Pillow opencv-python pytesseract fsspec
       - name: Run workflow
         run: python drive_to_pg.py
