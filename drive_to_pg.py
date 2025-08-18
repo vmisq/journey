@@ -272,30 +272,26 @@ def process_files(subfolder, folder, target, processor):
     else:
         print(f'No new items in {folder}')
 
-from prefect import flow, task
-from prefect.futures import wait
-
-@task
-def get_subfolders():
-    return list_subfolders()
-
-@task
-def process_each(subfolders, folder, target, function):
-    process_files(subfolders, folder, target, function)
-
-@flow
-def drive_to_pg():
+def main():
+    from multiprocessing import Process
     try:
         duckdb.sql("DETACH p")
     except duckdb.BinderException:
         pass
     duckdb.sql("ATTACH '' AS p (TYPE postgres)")
-    subfolders = get_subfolders()
+    subfolders = list_subfolders()
     task_list = [
-        process_each.submit(subfolder=subfolders, folder=os.environ.get('FOLDER_1'), target=os.environ.get('TARGET_1'), function=parse_scale_image),
-        process_each.submit(subfolder=subfolders, folder=os.environ.get('FOLDER_2'), target=os.environ.get('TARGET_2'), function=parse_loseit_files),
-        process_each.submit(subfolder=subfolders, folder=os.environ.get('FOLDER_3'), target=os.environ.get('TARGET_3'), function=parse_loseit_files),
-        process_each.submit(subfolder=subfolders, folder=os.environ.get('FOLDER_4'), target=os.environ.get('TARGET_4'), function=parse_strong_files),
-        process_each.submit(subfolder=subfolders, folder=os.environ.get('FOLDER_5'), target=os.environ.get('TARGET_5'), function=parse_strong_files),
+        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_1'), os.environ.get('TARGET_1'), parse_scale_image)),
+        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_2'), os.environ.get('TARGET_2'), parse_loseit_files)),
+        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_3'), os.environ.get('TARGET_3'), parse_loseit_files)),
+        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_4'), os.environ.get('TARGET_4'), parse_strong_files)),
+        Process(target=process_files, args=(subfolders, os.environ.get('FOLDER_5'), os.environ.get('TARGET_5'), parse_strong_files)),
     ]
-    wait(task_list)
+    for i in task_list:
+        i.start()
+        print('started')
+    for i in task_list:
+        i.join()
+        print('ended')
+if __name__=='__main__':
+    main()
