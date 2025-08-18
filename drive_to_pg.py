@@ -13,8 +13,8 @@ import pytesseract
 API_KEY = os.environ.get('API_KEY')
 ROOT_FOLDER_ID = os.environ.get('ROOT_FOLDER_ID')
 NAME_1 = os.environ.get('NAME_1')
-HEIGHT_1 = os.environ.get('HEIGHT_1')
-HEIGHT_OTHER = os.environ.get('HEIGHT_OTHER')
+HEIGHT_1 = float(os.environ.get('HEIGHT_1'))
+HEIGHT_OTHER = float(os.environ.get('HEIGHT_OTHER'))
 
 CODE_VERSION = {
     os.environ.get('FOLDER_1'): '0.1',
