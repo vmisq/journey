@@ -3,6 +3,9 @@ name: Run drive_to_pg
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" 
 
 jobs:
   run-workflow:
