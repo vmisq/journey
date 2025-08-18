@@ -213,7 +213,7 @@ def verify_connection():
             break
         except Exception as e:
             print(e)
-            time.sleep(2)
+            sleep(2)
             n += 1
             if n == 5:
                 raise e
@@ -284,7 +284,7 @@ def process_files(subfolder, folder, target, processor):
                 print(e)
                 print(cols)
                 print(tgt)
-                time.sleep(2)
+                sleep(2)
                 n += 1
                 if n == 5:
                     raise e
