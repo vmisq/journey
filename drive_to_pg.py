@@ -205,7 +205,24 @@ def parse_strong_files(csv_bytes):
     """) 
     yield ('', f_out)
 
+def verify_connection():
+    while n < 5:
+        try:
+            duckdb.sql("""SELECT id FROM p.log_parsed_items LIMIT 1""")
+            break
+        except Exception as e:
+            print(e)
+            n += 1
+            if n == 5:
+                raise e
+
 def process_files(subfolder, folder, target, processor):
+    try:
+        duckdb.sql("DETACH p")
+    except duckdb.BinderException:
+        pass
+    duckdb.sql("ATTACH '' AS p (TYPE postgres)")
+    verify_connection()
     v = CODE_VERSION[folder]
     all_files = list_files(subfolder[folder])
     if not all_files:
