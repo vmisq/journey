@@ -31,6 +31,10 @@ jobs:
       HEIGHT_OTHER: ${{ secrets.HEIGHT_OTHER }}
 
     steps:
+      - name: Debug secrets
+        run: |
+          echo "FOLDER_1=${FOLDER_1}"
+          echo "TARGET_1=${TARGET_1}"
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
