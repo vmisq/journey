@@ -206,6 +206,7 @@ def parse_strong_files(csv_bytes):
     yield ('', f_out)
 
 def verify_connection():
+    n = 0
     while n < 5:
         try:
             duckdb.sql("""SELECT id FROM p.log_parsed_items LIMIT 1""")
@@ -309,6 +310,7 @@ def main():
     for p in task_list:
         p.join()
         if p.exitcode != 0:
+            p.terminate()
             raise RuntimeError(f"Process {p.name} failed with exit code {p.exitcode}")
 
 if __name__=='__main__':
