@@ -1,0 +1,42 @@
+name: Run drive_to_pg
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  run-workflow:
+    runs-on: ubuntu-latest
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+      PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGHOST: ${{ secrets.PGHOST }}
+      PGUSER: ${{ secrets.PGUSER }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      ROOT_FOLDER_ID: ${{ secrets.ROOT_FOLDER_ID }}
+      FOLDER_1: ${{ secrets.FOLDER_1 }}
+      FOLDER_2: ${{ secrets.FOLDER_2 }}
+      FOLDER_3: ${{ secrets.FOLDER_3 }}
+      FOLDER_4: ${{ secrets.FOLDER_4 }}
+      FOLDER_5: ${{ secrets.FOLDER_5 }}
+      TARGET_1: ${{ secrets.TARGET_1 }}
+      TARGET_2: ${{ secrets.TARGET_2 }}
+      TARGET_3: ${{ secrets.TARGET_3 }}
+      TARGET_4: ${{ secrets.TARGET_4 }}
+      TARGET_5: ${{ secrets.TARGET_5 }}
+      NAME_1: ${{ secrets.NAME_1 }}
+      HEIGHT_1: ${{ secrets.HEIGHT_1 }}
+      HEIGHT_OTHER: ${{ secrets.HEIGHT_OTHER }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: pip install duckdb pyarrow numpy Pillow opencv-python pytesseract
+      - name: Run workflow
+        run: python drive_to_pg.py
